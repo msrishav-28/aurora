@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURORA | Human-Aware AGI</title>
+    <meta name="description" content="The rise of Human-Aware AGI. Bridging the gap between cold computation and genuine human empathy.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Manrope:wght@200;300;400;600&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP & Lenis for Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.29/dist/lenis.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                        display: ['Syncopate', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        void: '#030305',
+                        subtle: '#1a1a1f',
+                        accent: '#9D4EDD', // Deep Violet
+                        warm: '#FF9E64',   // Amber
+                        cyan: '#00f0ff'    // Electric Cyan
+                    },
+                    backgroundImage: {
+                        'aurora-gradient': 'radial-gradient(circle at 50% 50%, rgba(157, 78, 221, 0.12) 0%, rgba(3, 3, 5, 0) 60%)',
+                        'glass-gradient': 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)'
+                    },
+                    letterSpacing: {
+                        'ultra': '0.3em',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles */
+        body {
+            background-color: #030305;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Hide cursor only on non-touch devices via JS check later, defaulting to hidden here for desktop feel */
+        @media (hover: hover) and (pointer: fine) {
+            body { cursor: none; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030305; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Custom Cursor */
+        .cursor-dot {
+            width: 6px; height: 6px; background: white;
+            position: fixed; top: 0; left: 0;
+            border-radius: 50%; z-index: 9999;
+            pointer-events: none; mix-blend-mode: difference;
+            display: none; /* Hidden by default, enabled via JS for desktop */
+        }
+        .cursor-outline {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: fixed; top: 0; left: 0;
+            border-radius: 50%; z-index: 9998;
+            pointer-events: none; transition: width 0.2s, height 0.2s, background-color 0.2s;
+            transform: translate(-50%, -50%);
+            display: none; /* Hidden by default, enabled via JS for desktop */
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .glass-nav {
+            background: rgba(3, 3, 5, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Animations */
+        .text-glow { text-shadow: 0 0 20px rgba(157, 78, 221, 0.5); }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #fff, #9D4EDD, #FF9E64);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradientMove 5s linear infinite;
+        }
+
+        @keyframes gradientMove { to { background-position: 200% center; } }
+        
+        .grid-bg {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed; inset: 0; background: #030305; z-index: 10000;
+            display: flex; justify-content: center; items-center;
+        }
+        .loader-bar { width: 0%; height: 2px; background: white; transition: width 1s ease; }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed; inset: 0; background: #030305; z-index: 9990;
+            display: flex; flex-direction: column; justify-content: center; items-center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .mobile-menu.active { opacity: 1; pointer-events: all; }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent selection:text-white">
+
+    <!-- Loader -->
+    <div class="loader">
+        <div class="flex flex-col items-center gap-4">
+            <div class="font-display font-bold text-2xl tracking-widest animate-pulse">AURORA</div>
+            <div class="w-64 h-[1px] bg-white/10 rounded-full overflow-hidden">
+                <div class="loader-bar h-full bg-accent"></div>
+            </div>
+            <div class="font-mono text-[10px] text-white/50">INITIALIZING SYSTEMS...</div>
+        </div>
+    </div>
+
+    <!-- Custom Cursor Elements -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu glass-card backdrop-blur-xl">
+        <button id="close-menu" class="absolute top-6 right-6 font-mono text-white/50 hover:text-white">
+            [CLOSE]
+        </button>
+        <nav class="flex flex-col gap-8 text-center">
+            <a href="#vision" class="mobile-link font-display text-3xl hover:text-accent transition-colors">VISION</a>
+            <a href="#tech" class="mobile-link font-display text-3xl hover:text-accent transition-colors">TECHNOLOGY</a>
+            <a href="#specs" class="mobile-link font-display text-3xl hover:text-accent transition-colors">METRICS</a>
+            <a href="#contact" class="mobile-link font-display text-3xl hover:text-accent transition-colors">CONTACT</a>
+        </nav>
+        <div class="absolute bottom-10 font-mono text-xs text-white/30">ID: 2561095</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full z-50 px-6 md:px-12 py-5 flex justify-between items-center transition-all duration-300">
+        <a href="#" class="font-display font-bold text-xl tracking-wider hover:text-accent transition-colors cursor-none-target z-50 relative">
+            AURORA<span class="text-accent">.</span>CORE
+        </a>
+        
+        <div class="hidden md:flex gap-10 font-mono text-[11px] tracking-widest text-white/60">
+            <a href="#vision" class="hover:text-white transition-colors cursor-none-target group relative">
+                VISION
+                <span class="absolute -bottom-1 left-0 w-0 h-[1px] bg-accent transition-all group-hover:w-full"></span>
+            </a>
+            <a href="#tech" class="hover:text-white transition-colors cursor-none-target group relative">
+                TECHNOLOGY
+                <span class="absolute -bottom-1 left-0 w-0 h-[1px] bg-accent transition-all group-hover:w-full"></span>
+            </a>
+            <a href="#specs" class="hover:text-white transition-colors cursor-none-target group relative">
+                METRICS
+                <span class="absolute -bottom-1 left-0 w-0 h-[1px] bg-accent transition-all group-hover:w-full"></span>
+            </a>
+        </div>
+
+        <a href="#contact" class="hidden md:block px-6 py-2 border border-white/20 font-mono text-xs hover:bg-white hover:text-black transition-all duration-300 cursor-none-target">
+            JOIN BETA
+        </a>
+        
+        <!-- Mobile Menu Icon -->
+        <button id="open-menu" class="md:hidden font-mono text-xs text-accent cursor-none-target z-50 relative p-2">
+            [MENU]
+        </button>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative h-screen flex flex-col items-center justify-center overflow-hidden">
+        <!-- Background FX -->
+        <div class="absolute inset-0 bg-aurora-gradient animate-pulse duration-[8000ms]"></div>
+        <div class="absolute inset-0 grid-bg opacity-20"></div>
+        
+        <div class="container mx-auto px-4 relative z-10 text-center mt-10">
+            <div class="overflow-hidden mb-6 flex justify-center">
+                <div class="border border-white/10 px-4 py-1 rounded-full glass-card reveal-hero opacity-0">
+                    <p class="font-mono text-accent text-[10px] md:text-xs tracking-ultra uppercase">Project Aurora • ID: 2561095</p>
+                </div>
+            </div>
+            
+            <h1 class="font-display font-bold leading-none mb-8">
+                <div class="overflow-hidden">
+                    <span class="block text-5xl md:text-8xl lg:text-9xl reveal-hero translate-y-full opacity-0">BEYOND</span>
+                </div>
+                <div class="overflow-hidden">
+                    <span class="block text-5xl md:text-8xl lg:text-9xl reveal-hero translate-y-full opacity-0 gradient-text pb-4">COLD LOGIC</span>
+                </div>
+            </h1>
+            
+            <div class="max-w-2xl mx-auto overflow-hidden">
+                <p class="font-sans font-light text-white/70 text-lg md:text-xl leading-relaxed reveal-hero translate-y-full opacity-0">
+                    The rise of Human-Aware AGI. We are building systems that bridge the fundamental gap between computational power and genuine human understanding.
+                </p>
+            </div>
+
+            <div class="mt-12 reveal-hero opacity-0 translate-y-full">
+                <a href="#vision" class="group flex flex-col items-center gap-2 cursor-none-target">
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-accent transition-colors">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:text-accent transition-colors">
+                            <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                        </svg>
+                    </div>
+                    <span class="font-mono text-[10px] tracking-widest text-white/40">SCROLL TO INITIALIZE</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Floating particles -->
+        <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-accent rounded-full blur-[2px] opacity-50 animate-bounce delay-75"></div>
+        <div class="absolute bottom-1/3 right-1/5 w-1 h-1 bg-cyan rounded-full blur-[1px] opacity-70 animate-pulse"></div>
+    </header>
+
+    <!-- Vision / The Gap -->
+    <section id="vision" class="py-32 relative border-t border-white/5">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="order-2 lg:order-1 reveal-section opacity-0">
+                    <h2 class="font-display text-3xl md:text-5xl mb-8 leading-tight">
+                        THE LIMITS OF <br>
+                        <span class="text-white/30">COMPUTATION</span>
+                    </h2>
+                    <p class="text-white/70 text-lg font-light mb-8 leading-relaxed">
+                        Today's AI operates in a vacuum. It processes data but misses the nuance. It calculates but does not feel. This disconnect creates barriers in healthcare, education, and daily interaction.
+                    </p>
+                    <blockquote class="pl-6 border-l-2 border-accent italic text-xl text-white font-light mb-8">
+                        "Aurora doesn't replace humanity—it amplifies it."
+                    </blockquote>
+                    
+                    <div class="flex gap-4">
+                         <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-accent rounded-full"></span>
+                            <span class="font-mono text-xs text-white/60">EMPATHY ENGINE</span>
+                         </div>
+                         <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-cyan rounded-full"></span>
+                            <span class="font-mono text-xs text-white/60">CONTEXT AWARE</span>
+                         </div>
+                    </div>
+                </div>
+                
+                <div class="order-1 lg:order-2 relative h-[500px] reveal-section opacity-0">
+                    <!-- Abstract Graphic -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-void to-subtle rounded-2xl border border-white/10 overflow-hidden group">
+                        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" alt="AI Neural Network" class="w-full h-full object-cover opacity-40 mix-blend-overlay scale-105 group-hover:scale-100 transition-transform duration-[2s]">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent"></div>
+                        
+                        <!-- Floating Card inside image -->
+                        <div class="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-xl border-l-4 border-accent">
+                            <div class="font-mono text-accent text-xs mb-2">/// MISSION DIRECTIVE</div>
+                            <p class="font-sans text-lg">"To create a humanoid that not only thinks—but feels, understands, and collaborates."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Architecture -->
+    <section id="tech" class="py-32 bg-subtle/30 relative overflow-hidden">
+        <!-- Animated Background Mesh -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="white" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+
+        <div class="container mx-auto px-6 md:px-12 relative z-10">
+            <div class="text-center mb-20 reveal-section opacity-0">
+                <p class="font-mono text-accent text-xs tracking-widest mb-4">SYSTEM ARCHITECTURE</p>
+                <h2 class="font-display text-4xl md:text-6xl">NEURAL FRAMEWORK</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Card 1: Perception -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group reveal-card opacity-0 cursor-none-target">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="font-display text-4xl text-white/10 group-hover:text-accent transition-colors">01</div>
+                        <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        </div>
+                    </div>
+                    <h3 class="font-display text-xl mb-2 group-hover:text-accent transition-colors">PERCEPTION</h3>
+                    <p class="font-mono text-xs text-white/50 mb-4 uppercase">Multi-Modal Sensing</p>
+                    <p class="text-white/70 font-light text-sm leading-relaxed">
+                        Captures sensory input through vision, audio, and haptic sensors operating at millisecond precision. Seeing the world as humans do.
+                    </p>
+                </div>
+
+                <!-- Card 2: Reasoning -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group reveal-card opacity-0 mt-0 md:-mt-8 cursor-none-target">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="font-display text-4xl text-white/10 group-hover:text-warm transition-colors">02</div>
+                        <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-warm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        </div>
+                    </div>
+                    <h3 class="font-display text-xl mb-2 group-hover:text-warm transition-colors">REASONING</h3>
+                    <p class="font-mono text-xs text-white/50 mb-4 uppercase">Emotional Intelligence</p>
+                    <p class="text-white/70 font-light text-sm leading-relaxed">
+                        Transformer-based models processed on Jetson Orin Nano. Recognizing subtle contextual cues, cultural norms, and emotional states.
+                    </p>
+                </div>
+
+                <!-- Card 3: Action -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group reveal-card opacity-0 cursor-none-target">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="font-display text-4xl text-white/10 group-hover:text-cyan transition-colors">03</div>
+                        <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11" /></svg>
+                        </div>
+                    </div>
+                    <h3 class="font-display text-xl mb-2 group-hover:text-cyan transition-colors">ACTION</h3>
+                    <p class="font-mono text-xs text-white/50 mb-4 uppercase">Human-Feeling Response</p>
+                    <p class="text-white/70 font-light text-sm leading-relaxed">
+                        Generates physical movements and verbal communication that balance efficiency with warmth. 
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metrics / Stats -->
+    <section id="specs" class="py-40 relative border-t border-white/5">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-8 reveal-section opacity-0">
+                <h2 class="font-display text-4xl md:text-5xl">PERFORMANCE<br>METRICS</h2>
+                <div class="font-mono text-right text-xs text-white/50 mt-4 md:mt-0">
+                    <div>HARDWARE: JETSON ORIN NANO</div>
+                    <div>STATUS: OPTIMIZED</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+                <!-- Metric 1 -->
+                <div class="reveal-metric">
+                    <div class="flex items-baseline">
+                        <span class="font-display text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/10 counter" data-target="98">0</span>
+                        <span class="text-accent text-2xl">%</span>
+                    </div>
+                    <div class="w-full h-[1px] bg-white/10 my-4"></div>
+                    <p class="font-mono text-xs text-white/60 uppercase tracking-wider">Emotional<br>Recognition</p>
+                </div>
+
+                <!-- Metric 2 -->
+                <div class="reveal-metric">
+                    <div class="flex items-baseline">
+                        <span class="font-display text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/10 counter" data-target="3">0</span>
+                        <span class="text-cyan text-2xl">ms</span>
+                    </div>
+                    <div class="w-full h-[1px] bg-white/10 my-4"></div>
+                    <p class="font-mono text-xs text-white/60 uppercase tracking-wider">Response<br>Latency</p>
+                </div>
+
+                <!-- Metric 3 -->
+                <div class="reveal-metric">
+                    <div class="flex items-baseline">
+                        <span class="font-display text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/10 counter" data-target="24">0</span>
+                        <span class="text-warm text-2xl">/7</span>
+                    </div>
+                    <div class="w-full h-[1px] bg-white/10 my-4"></div>
+                    <p class="font-mono text-xs text-white/60 uppercase tracking-wider">Adaptive<br>Learning</p>
+                </div>
+                
+                <!-- Metric 4 -->
+                <div class="reveal-metric">
+                    <div class="flex items-baseline">
+                        <span class="font-display text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/10 counter" data-target="3">0</span>
+                        <span class="text-white/30 text-2xl">+</span>
+                    </div>
+                    <div class="w-full h-[1px] bg-white/10 my-4"></div>
+                    <p class="font-mono text-xs text-white/60 uppercase tracking-wider">Languages<br>Supported</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="py-32 bg-void relative">
+        <div class="container mx-auto px-6 md:px-12 mb-12 reveal-section opacity-0">
+            <h2 class="font-display text-3xl">EXECUTION ROADMAP</h2>
+            <p class="font-mono text-white/40 mt-2 text-xs uppercase tracking-widest">Phase: Next 6 Months</p>
+        </div>
+        
+        <!-- Horizontal Scroll Area -->
+        <div class="w-full overflow-x-auto pb-12 hide-scrollbar pl-6 md:pl-12 pr-6">
+            <div class="flex gap-8 w-max">
+                <!-- Card 1 -->
+                <div class="w-[300px] md:w-[400px] glass-card p-8 rounded-xl border-t border-white/10 group hover:border-accent/50 transition-all duration-300 cursor-none-target reveal-card-h opacity-0">
+                    <div class="font-mono text-accent/50 text-xs mb-6">PHASE 01</div>
+                    <h3 class="font-display text-xl mb-4">BIONIC HEAD</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">
+                        Designing expressive bionic head capable of displaying authentic human-like emotional expressions.
+                    </p>
+                    <div class="mt-8 flex gap-2">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">CAD</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">MECHATRONICS</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="w-[300px] md:w-[400px] glass-card p-8 rounded-xl border-t border-white/10 group hover:border-warm/50 transition-all duration-300 cursor-none-target reveal-card-h opacity-0">
+                    <div class="font-mono text-warm/50 text-xs mb-6">PHASE 02</div>
+                    <h3 class="font-display text-xl mb-4">CNS ARCHITECTURE</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">
+                        Developing Central Nervous System and configuring Jetson Orin Nano Gen AI Supercomputer operations.
+                    </p>
+                    <div class="mt-8 flex gap-2">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">NVIDIA JETSON</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">PYTHON</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="w-[300px] md:w-[400px] glass-card p-8 rounded-xl border-t border-white/10 group hover:border-cyan/50 transition-all duration-300 cursor-none-target reveal-card-h opacity-0">
+                    <div class="font-mono text-cyan/50 text-xs mb-6">PHASE 03</div>
+                    <h3 class="font-display text-xl mb-4">ENHANCED MANIPULATION</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">
+                        Creating robotic arms with extensive suction support and enhanced grippers for delicate object manipulation.
+                    </p>
+                    <div class="mt-8 flex gap-2">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">ROS</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">KINEMATICS</span>
+                    </div>
+                </div>
+                
+                 <!-- Card 4 -->
+                 <div class="w-[300px] md:w-[400px] glass-card p-8 rounded-xl border-t border-white/10 group hover:border-purple-500/50 transition-all duration-300 cursor-none-target reveal-card-h opacity-0">
+                    <div class="font-mono text-purple-500/50 text-xs mb-6">PHASE 04</div>
+                    <h3 class="font-display text-xl mb-4">SPEECH & INTEGRATION</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">
+                        Finalizing Speech-to-Text and Text-to-Speech setup with complete system confinement and ROS integration.
+                    </p>
+                    <div class="mt-8 flex gap-2">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">NLP</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-mono text-white/40">OLLAMA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-black border-t border-white/10 relative pt-20 pb-10 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(157,78,221,0.1),_transparent_50%)]"></div>
+        
+        <div class="container mx-auto px-6 md:px-12 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 mb-20">
+                <div>
+                    <h2 class="font-display text-3xl md:text-5xl mb-8">READY TO<br>EVOLVE?</h2>
+                    <p class="text-white/60 font-light max-w-md mb-8">
+                        Join us in building the future of compassionate technology. The era of Aurora is beginning.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                         <a href="mailto:contact@aurora.tech" class="px-8 py-3 bg-white text-black font-mono text-xs font-bold hover:bg-accent hover:text-white transition-all duration-300 cursor-none-target text-center">
+                            CONTACT TEAM
+                        </a>
+                        <a href="#" class="px-8 py-3 border border-white/20 font-mono text-xs font-bold hover:bg-white/10 transition-all duration-300 cursor-none-target text-center">
+                            DOWNLOAD WHITEPAPER
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="md:text-right flex flex-col justify-end">
+                    <div class="font-display text-2xl mb-4">CHRIST UNIVERSITY</div>
+                    <div class="font-mono text-sm text-white/40 mb-6">
+                        <p>Founder & Lead Developer: Mr. Niroop H</p>
+                        <p>Faculty Advisor: Fr. Shijin PJ</p>
+                        <p>ID: 2561095</p>
+                    </div>
+                    <div class="text-accent font-mono text-lg">
+                        +91 72593 82794
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-white/30">
+                <p>© 2025 AURORA CORE TECH. ALL RIGHTS RESERVED.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-white transition-colors cursor-none-target">PRIVACY</a>
+                    <a href="#" class="hover:text-white transition-colors cursor-none-target">TERMS</a>
+                    <a href="#" class="hover:text-white transition-colors cursor-none-target">LINKEDIN</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Javascript Logic -->
+    <script>
+        // 1. Loader Animation
+        window.addEventListener('load', () => {
+            const loaderBar = document.querySelector('.loader-bar');
+            const loader = document.querySelector('.loader');
+            
+            // Simulate loading progress
+            loaderBar.style.width = '100%';
+            
+            setTimeout(() => {
+                gsap.to(loader, {
+                    yPercent: -100,
+                    duration: 1,
+                    ease: "power4.inOut",
+                    onComplete: initAnimations
+                });
+            }, 1200);
+        });
+
+        // 2. Initialize Lenis (Smooth Scroll) - SYNC WITH GSAP
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        // Synchronize Lenis and ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+
+        gsap.ticker.lagSmoothing(0);
+
+        // 3. Custom Cursor Logic (Desktop Only Check)
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        const interactiveElements = document.querySelectorAll('.cursor-none-target');
+
+        // Check if primary input is mouse
+        const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+        if (isDesktop) {
+            cursorDot.style.display = 'block';
+            cursorOutline.style.display = 'block';
+
+            window.addEventListener('mousemove', (e) => {
+                const posX = e.clientX;
+                const posY = e.clientY;
+
+                // Dot follows instantly
+                cursorDot.style.left = `${posX}px`;
+                cursorDot.style.top = `${posY}px`;
+
+                // Outline follows with delay
+                cursorOutline.animate({
+                    left: `${posX}px`,
+                    top: `${posY}px`
+                }, { duration: 500, fill: "forwards" });
+            });
+
+            // Magnetic/Hover Effect
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursorOutline.style.width = '60px';
+                    cursorOutline.style.height = '60px';
+                    cursorOutline.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    cursorOutline.style.borderColor = 'transparent';
+                    cursorDot.style.opacity = '0';
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursorOutline.style.width = '40px';
+                    cursorOutline.style.height = '40px';
+                    cursorOutline.style.backgroundColor = 'transparent';
+                    cursorOutline.style.borderColor = 'rgba(255,255,255,0.3)';
+                    cursorDot.style.opacity = '1';
+                });
+            });
+        }
+
+        // 4. Mobile Menu Logic
+        const menuBtn = document.getElementById('open-menu');
+        const closeBtn = document.getElementById('close-menu');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        function toggleMenu() {
+            mobileMenu.classList.toggle('active');
+            if(mobileMenu.classList.contains('active')) {
+                gsap.fromTo(mobileLinks, 
+                    { y: 50, opacity: 0 },
+                    { y: 0, opacity: 1, stagger: 0.1, duration: 0.5 }
+                );
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
+
+
+        // 5. GSAP Animations (Init after loader)
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Text Reveal
+            gsap.to(".reveal-hero", {
+                y: 0,
+                opacity: 1,
+                stagger: 0.15,
+                duration: 1.5,
+                ease: "power4.out"
+            });
+
+            // Section Headers & Content
+            gsap.utils.toArray('.reveal-section').forEach(section => {
+                gsap.fromTo(section, 
+                    { y: 50, opacity: 0 },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: section,
+                            start: "top 80%",
+                        }
+                    }
+                );
+            });
+
+            // Architecture Cards (Staggered)
+            gsap.fromTo(".reveal-card", 
+                { y: 100, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.2,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: "#tech",
+                        start: "top 75%",
+                    }
+                }
+            );
+            
+            // Roadmap Cards (Horizontal Stagger)
+            gsap.fromTo(".reveal-card-h", 
+                { x: 50, opacity: 0 },
+                {
+                    x: 0,
+                    opacity: 1,
+                    stagger: 0.1,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".reveal-card-h",
+                        start: "top 85%",
+                    }
+                }
+            );
+
+            // Animated Counters
+            gsap.utils.toArray('.counter').forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                gsap.to(counter, {
+                    innerHTML: target,
+                    duration: 2.5,
+                    snap: { innerHTML: 1 },
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: counter,
+                        start: "top 85%",
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
