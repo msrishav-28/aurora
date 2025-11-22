@@ -30,13 +30,13 @@ export default function Hero() {
           </div>
         </div>
 
-        <h1 className="font-display font-bold leading-none mb-8">
-          <div className="overflow-hidden">
+        <h1 className="font-display font-bold leading-tight mb-8">
+          <div className="overflow-hidden py-2">
             <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero">
               {HERO.title.line1}
             </span>
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden py-2">
             <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero gradient-text pb-4">
               {HERO.title.line2}
             </span>
