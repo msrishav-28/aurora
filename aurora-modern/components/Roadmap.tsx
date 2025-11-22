@@ -4,7 +4,7 @@ export default function Roadmap() {
   return (
     <section id="roadmap" className="py-32 relative">
       <div className="container mx-auto px-6 md:px-12">
-        <div className="mb-20 reveal-section">
+        <div className="mb-20 reveal-section opacity-0">
           <h2 className="font-display text-3xl md:text-5xl mb-6">
             {ROADMAP.heading}
           </h2>
@@ -15,7 +15,7 @@ export default function Roadmap() {
           {ROADMAP.phases.map((phase, index) => (
             <div
               key={index}
-              className={`group relative pl-8 border-l border-white/10 hover:border-accent transition-colors duration-500 reveal-section`}
+              className={`group relative pl-8 border-l border-white/10 hover:border-accent transition-colors duration-500 reveal-card-h opacity-0`}
             >
               <div className="absolute -left-[5px] top-0 w-[9px] h-[9px] bg-void border border-white/30 rounded-full group-hover:bg-accent group-hover:border-accent transition-colors duration-500"></div>
               <div className="grid md:grid-cols-12 gap-8 items-start">

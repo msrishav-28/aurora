@@ -52,9 +52,9 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
 
     // Hero Text Reveal
-    gsap.from(".reveal-hero", {
-      y: 100,
-      opacity: 0,
+    gsap.to(".reveal-hero", {
+      y: 0,
+      opacity: 1,
       stagger: 0.15,
       duration: 1.5,
       ease: "power4.out",
@@ -62,9 +62,9 @@ export default function Home() {
 
     // Section Headers & Content
     gsap.utils.toArray<HTMLElement>(".reveal-section").forEach((section) => {
-      gsap.from(section, {
-        y: 50,
-        opacity: 0,
+      gsap.to(section, {
+        y: 0,
+        opacity: 1,
         duration: 1,
         ease: "power3.out",
         scrollTrigger: {
@@ -75,9 +75,9 @@ export default function Home() {
     });
 
     // Architecture Cards (Staggered)
-    gsap.from(".reveal-card", {
-      y: 100,
-      opacity: 0,
+    gsap.to(".reveal-card", {
+      y: 0,
+      opacity: 1,
       stagger: 0.2,
       duration: 1,
       ease: "power3.out",
@@ -88,9 +88,9 @@ export default function Home() {
     });
 
     // Roadmap Cards (Horizontal Stagger)
-    gsap.from(".reveal-card-h", {
-      x: 50,
-      opacity: 0,
+    gsap.to(".reveal-card-h", {
+      x: 0,
+      opacity: 1,
       stagger: 0.1,
       duration: 1,
       ease: "power3.out",
@@ -98,6 +98,21 @@ export default function Home() {
         trigger: ".reveal-card-h",
         start: "top 85%",
       },
+    });
+
+    // Animated Counters
+    gsap.utils.toArray<HTMLElement>(".counter").forEach((counter) => {
+      const target = parseFloat(counter.getAttribute("data-target") || "0");
+      gsap.to(counter, {
+        innerHTML: target,
+        duration: 2.5,
+        snap: { innerHTML: 1 },
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: counter,
+          start: "top 85%",
+        },
+      });
     });
   };
 

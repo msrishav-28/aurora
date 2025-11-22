@@ -7,7 +7,7 @@ export default function Vision() {
     <section id="vision" className="py-32 relative border-t border-white/5">
       <div className="container mx-auto px-6 md:px-12">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="order-2 lg:order-1 reveal-section">
+          <div className="order-2 lg:order-1 reveal-section opacity-0">
             <h2 className="font-display text-3xl md:text-5xl mb-8 leading-tight">
               {VISION.heading.line1} <br />
               <span className="text-white/30">{VISION.heading.line2}</span>
@@ -31,7 +31,7 @@ export default function Vision() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 relative h-[500px] reveal-section">
+          <div className="order-1 lg:order-2 relative h-[500px] reveal-section opacity-0">
             {/* Abstract Graphic */}
             <div className="absolute inset-0 bg-gradient-to-br from-void to-subtle rounded-2xl border border-white/10 overflow-hidden group">
               {/* eslint-disable-next-line @next/next/no-img-element */}

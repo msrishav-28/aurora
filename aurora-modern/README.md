@@ -6,9 +6,10 @@ A modern, high-performance landing page for Aurora Core Tech, built with Next.js
 
 - **Modern Stack**: Next.js 16 (App Router), React 19, TypeScript.
 - **Styling**: Tailwind CSS v4 with custom fonts (Manrope, Syncopate, JetBrains Mono).
-- **Animations**: GSAP ScrollTrigger for reveal effects and Lenis for smooth scrolling.
+- **Animations**: GSAP ScrollTrigger for reveal effects, Tween animations for counters, and Lenis for smooth scrolling.
 - **Modular Content**: All text and data are centralized in `data/index.tsx` for easy updates.
 - **Responsive**: Fully responsive design for all device sizes.
+- **Parity**: 100% visual and functional parity with the original HTML implementation.
 
 ## 🛠️ Getting Started
 

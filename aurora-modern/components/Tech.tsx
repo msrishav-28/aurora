@@ -28,7 +28,7 @@ export default function Tech() {
       </div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
-        <div className="text-center mb-20 reveal-section">
+        <div className="text-center mb-20 reveal-section opacity-0">
           <p className="font-mono text-accent text-xs tracking-widest mb-4">
             {TECH.heading.sub}
           </p>
@@ -41,7 +41,7 @@ export default function Tech() {
           {TECH.cards.map((card, index) => (
             <div
               key={index}
-              className={`glass-card p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group reveal-card cursor-none-target ${
+              className={`glass-card p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group reveal-card opacity-0 cursor-none-target ${
                 index === 1 ? "mt-0 md:-mt-8" : ""
               }`}
             >

@@ -23,7 +23,7 @@ export default function Hero() {
 
       <div ref={containerRef} className="container mx-auto px-4 relative z-10 text-center mt-10">
         <div className="overflow-hidden mb-6 flex justify-center">
-          <div className="border border-white/10 px-4 py-1 rounded-full glass-card reveal-hero">
+          <div className="border border-white/10 px-4 py-1 rounded-full glass-card reveal-hero opacity-0">
             <p className="font-mono text-accent text-[10px] md:text-xs tracking-ultra uppercase">
               {HERO.id}
             </p>
@@ -32,24 +32,24 @@ export default function Hero() {
 
         <h1 className="font-display font-bold leading-tight mb-8">
           <div className="overflow-hidden py-2">
-            <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero">
+            <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero translate-y-full opacity-0">
               {HERO.title.line1}
             </span>
           </div>
           <div className="overflow-hidden py-2">
-            <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero gradient-text pb-4">
+            <span className="block text-5xl md:text-8xl lg:text-9xl reveal-hero translate-y-full opacity-0 gradient-text pb-4">
               {HERO.title.line2}
             </span>
           </div>
         </h1>
 
         <div className="max-w-2xl mx-auto overflow-hidden">
-          <p className="font-sans font-light text-white/70 text-lg md:text-xl leading-relaxed reveal-hero">
+          <p className="font-sans font-light text-white/70 text-lg md:text-xl leading-relaxed reveal-hero translate-y-full opacity-0">
             {HERO.description}
           </p>
         </div>
 
-        <div className="mt-12 reveal-hero">
+        <div className="mt-12 reveal-hero opacity-0 translate-y-full">
           <Link
             href="#vision"
             className="group flex flex-col items-center gap-2 cursor-none-target"
