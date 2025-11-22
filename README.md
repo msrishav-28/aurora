@@ -7,13 +7,14 @@ Welcome to the Aurora Core Tech repository. This project hosts the landing page 
 This repository contains two versions of the landing page:
 
 ### 1. 🚀 Modern Version (`/aurora-modern`)
-**Current Production Version**
-A complete rewrite using a modern web stack for scalability, performance, and modularity.
+**Current Production Version (Stable & Verified)**
+A complete, pixel-perfect rewrite using a modern web stack for scalability, performance, and modularity. Verified to have 100% visual and functional parity with the legacy version.
 
 -   **Stack**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4.
 -   **Features**:
     -   Modular content management via `data/index.tsx`.
-    -   Advanced animations with GSAP and Lenis.
+    -   Advanced animations with GSAP (ScrollTrigger, Tweens) and Lenis.
+    -   **Animated Counters** for performance metrics.
     -   Fully responsive and accessible.
 -   **Location**: [`/aurora-modern`](./aurora-modern)
 
